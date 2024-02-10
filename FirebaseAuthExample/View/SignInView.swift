@@ -3,6 +3,8 @@ import SwiftUI
 struct SignInView: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     @ObservedObject var authController: AuthController
 
     var body: some View {
@@ -21,7 +23,13 @@ struct SignInView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
 
                     Button(action: {
-                        authController.signIn(email: email, password: password)
+                        if email.isValidEmail && password.isValidPassword {
+                            authController.signIn(email: email, password: password)
+                        } else {
+                            // ユーザーにエラーメッセージを表示します。
+                            alertMessage = "メールアドレスまたはパスワードが無効です。"
+                            showingAlert = true
+                        }
                     }) {
                         Text("ログイン")
                             .frame(width: 250, height: 50)
@@ -29,6 +37,9 @@ struct SignInView: View {
                     .accentColor(Color.white)
                     .background(Color.black)
                     .cornerRadius(.infinity)
+                    .alert(isPresented: $showingAlert) {
+                        Alert(title: Text("エラー"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+                    }
 
                     if authController.isAuthenticated {
                         // ログイン後のページに遷移
