@@ -57,10 +57,3 @@ struct SignUpView: View {
         }
     }
 }
-    
-    // SignIn Preview
-    struct SignUpView_Previews: PreviewProvider {
-        static var previews: some View {
-            SignUpView(authController: AuthController())
-        }
-    }

@@ -1,25 +1,50 @@
 import SwiftUI
 
-// ログイン後の画面
 struct HelloPage: View {
     var authController: AuthController
+    @StateObject var viewModel = TodoViewModel()
+    @State var showAddTodoView = false
 
     var body: some View {
-        VStack {
-            Text("Hello, you're logged in!")
-                .font(.title)
-                .padding()
-            
-            Button(action: {
-                // ログアウトしてログイン画面へ遷移する
-                authController.signOut()
-            }) {
-                Text("ログアウト")
-                    .frame(width: 250, height: 50)
+        NavigationView {
+            List {
+                ForEach(viewModel.todos, id: \.date) { todo in
+                    NavigationLink(destination: EditTodoView(viewModel: viewModel, editingTodo: todo, editMode: true)) {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text(todo.title).bold()
+                                Text(todo.date.dateValue(), style: .date).foregroundStyle(.secondary)
+                            }
+                            .padding(.bottom,1)
+                            HStack {
+                                Text(todo.note)
+                                    .lineLimit(1)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.bottom,1)
+                            HStack {
+                                Text(String(repeating:"⭐️", count: Int(todo.importance)))
+                            }
+                        }
+                    }
+                }
             }
-            .accentColor(Color.white)
-            .background(Color.pink)
-            .cornerRadius(.infinity)
+            .navigationTitle("\(viewModel.todos.count) Todo Items")
+            .toolbar{
+                ToolbarItem{
+                    Button(action:{
+                        showAddTodoView = true
+                    }){
+                        Label("Add Todo", systemImage: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddTodoView, content: {
+                AddTodoView()
+            })
+            .onAppear() {
+                self.viewModel.fetchData()
+            }
         }
     }
 }
